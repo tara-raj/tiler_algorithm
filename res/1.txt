@@ -1,0 +1,3 @@
+a  bb        abb  
+aa        c  aac
+   dd   ccc  cccdd

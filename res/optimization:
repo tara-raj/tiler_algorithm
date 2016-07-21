@@ -1,0 +1,9 @@
+optimization:
+which order you place the tiles
+	most constrained piece first (width and height)
+	early bailout (look for these)
+avoid isomorphic solutions
+	never rotate or reflect one assymetrical piece
+		check assymetry by reflections
+
+

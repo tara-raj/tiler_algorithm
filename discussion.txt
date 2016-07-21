@@ -1,0 +1,68 @@
+Discussion of our project:
+
+First, we would like to outline the hierarchy by which our program is build upon: 
+1. There is a Tile class which represents one ascii character. 
+2. The tiles are then arranged into pieces through the Piece class. Pieces are groups of ascii characters that do not have spaces between them.
+3. The goal board is the largest piece that we are trying to arrange the other pieces to fit. This is identified in the Board class.
+4. The current board is an intemediary board that holds the pieces as we iterate through potential solutions. It is compared to the goal board to see if we have arrived at a solution. This is also contained in the Board class.
+
+Next, are the classes that our program contains:
+1. Tile.java represents a tile. It has an ascii char value and pointers to left, right, up, and down tiles. It also has an x and y position.
+2. Piece.java represents a piece. A piece is made of tiles and contains one tile as a root. Pieces have width and height, position, booleans to see if it has been tried to be placed, and a 2D char array that represents the tile configuration.
+3. Input.java is where we read the input .txt file and create tiles and pieces. We read column-wise and identify where new pieces begin based on the spaces in the .txt file.
+4. Board.java is where the algorithm is implemented. We are essentially taking an approach that uses recursion to check all possible piece confifurations. The pieces get added to current board which is compared to goal board. This class contains rotate and reflection methods as well. There is a backtracking algorithm built in as well with the delete piece option which may allow us to go back to a certain point in the (metaphorical) tree to attempt to place another piece.
+5. PieceComparator.java is an optimization we have added to our solution. It orders the pieces from largest (most contraining as defined by larges width and largest height) to smallest. This way we check the most contraining piece against the position in the board we are considering and so on.
+6. Window.java is where our GUI is implemented. We take the ascii char and convert it to an int to get a specific color from a library we have created. We also create a JFrame and display pieces through this class.
+7. Test.java is where we specify a txt file from our resources that we want to run through our tile solver. It's a pretty basic testing class.
+
+Now, we discuss the step-by-step process of our program and the algorithm we use:
+We begin by reading the input file (.txt file). To read the file, we read by the columns from left to right.
+The reason for the left to right versus the traditional top to bottom read is because of the way the pieces are split up.
+There are spaces in between them in a left to right fashion. So, we traverse the columns to see when we get a non-space char.
+(This is done in processInput in Input.java)
+
+Once a piece has been identified we then create the first tile (rrot tile) of the piece (using the Tile.java class and 
+initializing a piece using with the first tile using the Piece.java class). We start at the first non-space char identified 
+in the input file.
+
+We then look above, below, right, and left of the first tile. If there is a non-space char in any of those directions we 
+create a new tile (using the Tile.java class) and account for its orientation to the original tile by updating the pointer of the root tile. This is also update in the piece. The piece is added to an ArrayList of pieces. Other parameters considered
+are width, height, and size which are used later.
+(This is done in build in Piece.java)
+
+Once all the pieces have been built, we move to creating our solution board. To find what the solution board is, we simply
+iterate through all the pieces and select the one of largest size as our "goal" board. We also sort the board by largest piece size to smallest piece size as an optimization technique.
+(This is done in makeMatrix in Board.java)
+
+Next, we create a temporary blank board called a "current" board. This is where we will iteratively add pieces as they fit
+into the solution and the purpose of this board is to also allow us to delete pieces if in subsquent turns we find that
+what appeared to be a solution at the time is not actually. We call this our ability to rollback as we create a metaphorical
+tree of potential solutions.
+(This is also done in makeMatrix in Board.java)
+
+After we have our current board and goal board it is time to start seeing whether pieces will fit into the board. Since our
+ArrayList of pieces is sorted, we begin by seeing if the largest dimension piece, or most constraining piece, is able to fit
+into that position.
+(This is done in placePieces which calls doesItFit in Board.java)
+
+If the piece does not fit, we peform the appropriate rotations and reflections to the piece. A rotation means that we swap the width and height of the piece as well. A reflection simply flips all the x-coordinates or all the y-coordinates. All these methods require iterating through all the tiles of a piece to process them. We use the tiles parameter of a pice which is a representation of the tile orientation as a 2D character array (tiles char[][]).
+(These manipulations are done in RotatePiece, ReflectPieceX, and ReflectPieceY in Board.java)
+
+We either place the piece or move on to the next one. If the piece is places, we adjust the current position we are looking at to account for having added an entire piece. The indices of that piece will never be considered unless it is deleted later in the decision tree as a requirement for placing is whether the space is blank.
+(This is done in place in Board.java)
+
+If we cannot find a piece that fits in the position, we go back and delete the previous piece and try again. This is how we are essentially using a backtracking algorithm to look through all possible solutions. And when a solution is found we use the same recurision and tree to see if other solutions are possible. Ultimately, we are attempting all possible combinations and configurations of pieces in order to get all the possible solutions.
+(This is done in remove in Board.java)
+
+Note that the iteration to the next pieces is done in conjunction with the check as to whether a piece fits. We keep track
+of a current x and y position we are considering for placement and loop through the pieces in the method.
+(This is done in placePieces in Board.java)
+
+Finally we check for solution by seeing whether all the indices in the current board match that of the goal board. We print the number of soulutions by seeing the size of the ArrayList. We also print the solutions themselves by painting and repainting the board as needed.
+(Solution checking is done in isSolved in Board.java Painting is done in main in paintComponent in Window.java)
+
+Our GUI is created in Window.java. We have a frame which will hold all the pieces and tiles which are represented by colored
+squares. We take the ascii character and cast it to an integer to get the ascii numeric value. We then take that number index
+of a color library ArrayList which we create and set that as the current color. We then fill the rectangle with that ascii
+library color and print it to the screen based on the x and y coordinate we have specified from Board.java.
+(Visualizing the board is done in paintComponent and the color library is implemented in colorLib) 
